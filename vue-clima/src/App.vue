@@ -6,18 +6,32 @@
           type="text" 
           class="search-bar" 
           placeholder="Pesquisar..."
+          v-model="query"
+          @keypress="fetchWeather"
         >     
       </div>
 
-      <div class="weather-wrap">
+      <div 
+        class="weather-wrap" 
+        v-if="typeof weather.main != 'undefined'"
+      >
         <div class="location-box">
-          <div class="location">São Tomé, BR</div>
-          <div class="date">Segunda 20 Janeiro 2023</div>
+          <div class="location">
+            <b-icon icon="geo-alt-fill"></b-icon>
+            {{ weather.name }}
+            <img
+             class="flag"
+             :src="`https://countryflagsapi.com/png/${weather.sys.country}`"
+             crossorigin="anonymus" 
+             alt="flag">       
+        </div>
         </div>
 
         <div class="weather-box">
-          <div class="temp">9°c</div>
-          <div class="weather">Chuva</div>
+          <div class="weather">
+            <img class="nuvem" :src="`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`" alt="clima">
+          </div>
+          <div class="temp">{{ Math.round(weather.main.temp) }}°c</div>
         </div>
       </div>
     </main>
@@ -32,7 +46,26 @@ export default {
   data() {
     return {
       api_key: '36b833d54ab1752569c9ae7e7f5f2b40',
+      url_base: 'https://api.openweathermap.org/data/2.5/',
+      query: '',
+      weather: {},
     }
+  },
+
+  methods: {
+    fetchWeather(e) {
+      if (e.key == "Enter") {
+        fetch(`${this.url_base}weather?q=${this.query}&lang=pt&units=metric&APPID=${this.api_key}`)
+        .then(res => {
+          return res.json();
+        }).then(this.setResults);
+      }
+    },
+
+    setResults(results){
+      console.log(results)
+      this.weather = results;
+    },
   },
 
   components: {
@@ -53,7 +86,8 @@ export default {
   }
 
   #app {
-    background-image: url('./assets/cold-bg.jpg');
+    background: rgb(2,0,36);
+    background: linear-gradient(146deg, rgba(2,0,36,1) 0%, rgba(9,22,121,1) 35%, rgba(0,212,255,1) 100%);
     background-size: cover;
     background-position: bottom;
     transition: .4s;
@@ -62,7 +96,7 @@ export default {
   main {
     min-height: 100vh;
     padding: 25px;
-    background-image: linear-gradient(to bottom, rgba(0, 0, 0 , 0.25), rgba(0, 0, 0, 0.75));
+  
   }
 
   .search-box {
@@ -75,7 +109,7 @@ export default {
     width: 100%;
     padding: 15px;
 
-    color: #313131;
+    color: #FFF;
     font-size: 20px;
 
     appearance: none;
@@ -85,14 +119,17 @@ export default {
 
     box-shadow: 0px 0px 8px rgba(0,0,0,0.25);
     background-color: rgba(255,255,255,0.5);
-    border-radius: 0px 16px 0px 16px;
+    border-radius: 16px;
     transition: .4s;
+  }
+
+  .search-box .search-bar::placeholder {
+    color: #FFF;
   }
 
   .search-box .search-bar:focus {
     box-shadow: 0px 0px 16px rgba(0,0,0,0.25);
     background-color: rgba(255,255,255,0.75);
-    border-radius: 16px 0px 16px 0px;
   }
 
   .location-box .location {
@@ -103,12 +140,13 @@ export default {
     text-shadow: 1px 3px rgba(0, 0, 0, 0.25);
   }
 
-  .location-box .date {
-    color: #FFF;
-    font-size: 20px;
-    font-weight: 300;
-    font-style: italic;
-    text-align: center;
+  .location-box .flag {
+    height: 5vh;
+    box-shadow: 10px 10px 51px -5px rgba(0,0,0,0.41);
+  }
+
+  .nuvem {
+    height: 15vh;
   }
 
   .weather-box {
@@ -132,9 +170,8 @@ export default {
 
   .weather-box .weather {
     color: #FFF;
-    font-size: 48px;
-    font-weight: 700;
-    font-style: italic;
-    text-shadow: 3px 6px rgba(0, 0, 0 , 0.25);
+    font-size: 30px;
+    font-weight: 500;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.57);
   }
 </style>
